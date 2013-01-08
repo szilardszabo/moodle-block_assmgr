@@ -622,7 +622,7 @@ class flexible_table {
             return '';
         }
 
-        $LIKE = $DB->sql_ilike();
+        $LIKE = $DB->sql_like();
         if(!empty($this->sess->i_first) && !empty($this->sess->i_last)) {
             return 'firstname '.$LIKE.' \''.$this->sess->i_first.'%\' AND lastname '.$LIKE.' \''.$this->sess->i_last.'%\'';
         }
