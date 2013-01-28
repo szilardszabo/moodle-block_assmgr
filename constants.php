@@ -24,7 +24,7 @@ if(!defined('GRADE_ASSMGR_SOURCE')) {
     define('GRADE_ASSMGR_SOURCE',       'blocks/assmgr');
 }
 if(!defined('GRADE_ASSMGR_ITEMTYPE')) {
-    define('GRADE_ASSMGR_ITEMTYPE',     'outcome');
+    define('GRADE_ASSMGR_ITEMTYPE',     'mod');
 }
 if(!defined('GRADE_ASSMGR_ITEMMODULE')) {
     define('GRADE_ASSMGR_ITEMMODULE',   'block_assmgr');

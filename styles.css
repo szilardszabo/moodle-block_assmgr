@@ -39,6 +39,7 @@ assmgr .gradetext {
     background-color: #FFFFFF;
     overflow        : hidden;
     display         : block;
+	position		: relative;
 }
 
 .assmgr .progress_bar_big {
@@ -48,6 +49,7 @@ assmgr .gradetext {
     background-color: #FFFFFF;
     overflow        : hidden;
     display         : block;
+	position		: relative;
 }
 
 .assmgr .progress_bar_small .bar_avg,
@@ -87,12 +89,12 @@ assmgr .gradetext {
 }
 
 .assmgr .enrolledunits {
+    float           : right;
     width           : 49.5%;
 }
 
 .assmgr .enrolledunits .progress_bar_small {
     float           : right;   
-    
 }
 
 .assmgr .optiontable {
@@ -605,9 +607,6 @@ assmgr .gradetext {
     font-size           : 80%;
 }
 
-
-
-
 .assmgr table#user-grades td.hmarked {
 background-color:#ff9;
 }
@@ -616,39 +615,9 @@ background-color:#ff9;
 background-color:#fc9;
 }
 
-
-
-
-
-
-
-
-/************************
-Assmgr 2.5 specific styles
-*************************/
-
-
-
-.fixedTable table {
-	margin : 0em;
-	}
-	
-.fixedHead table {
-	margin : 0em;
-	}
-	
-#submissions_table_container	{
-	min-height	:	500px;
-	}
-	
-
-
-
-
-
-
-
-
-
-
-
+#progress204141320422270 {
+	background-color:red !important;
+	display:block !important;
+	width:50px !important;
+	height:100% !important;
+}

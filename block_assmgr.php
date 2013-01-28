@@ -52,8 +52,14 @@ class block_assmgr extends block_list {
         // are we a student on the course?
         $access_iscandidate = has_capability('block/assmgr:creddelevidenceforself', $coursecontext, $USER->id, false);
 
+        // are we a confirmer on the course?
+        $access_canconfirm = has_capability('block/assmgr:confirmevidence', $coursecontext);
+
         // are we an assessor on the course?
         $access_isassessor = has_capability('block/assmgr:assessportfolio', $coursecontext);
+
+        // are we a verifyer on the course?
+        $access_isverifier = has_capability('block/assmgr:verifyportfolio', $coursecontext);
 
         // cache the content of the block
         if($this->content !== null) {
@@ -89,10 +95,24 @@ class block_assmgr extends block_list {
             $this->content->icons[] = "<img src='{$CFG->wwwroot}/blocks/assmgr/pix/icon.gif' class='icon' alt='".get_string('assmgricon', 'block_assmgr')."' title='{$label}' />";
         }
 
+        if($access_canconfirm) {
+            $label = get_string('confirmevidence', 'block_assmgr');
+            $url = "{$CFG->wwwroot}/blocks/assmgr/actions/list_unconfirmed.php?course_id={$course_id}";
+            $this->content->items[] = "<a href='{$url}'>{$label}</a>";
+            $this->content->icons[] = "<img src='{$CFG->wwwroot}/blocks/assmgr/pix/icon.gif' class='icon' alt='".get_string('assmgricon', 'block_assmgr')."' title='{$label}' />";
+        }
+
         if($access_isassessor) {
             $label = get_string('assessportfolios', 'block_assmgr');
             $courseurl = ($course_id == $SITE->id) ? '' : "&amp;course_id={$course_id}";
             $url = "{$CFG->wwwroot}/blocks/assmgr/actions/list_portfolio_assessments.php?category_id={$course->category}{$courseurl}";
+            $this->content->items[] = "<a href='{$url}'>{$label}</a>";
+            $this->content->icons[] = "<img src='{$CFG->wwwroot}/blocks/assmgr/pix/icon.gif' class='icon' alt='".get_string('assmgricon', 'block_assmgr')."' title='{$label}' />";
+        }
+
+        if($access_isverifier) {
+            $label = get_string('verifyassessments', 'block_assmgr');
+            $url = "{$CFG->wwwroot}/blocks/assmgr/actions/list_verifications.php?course_id={$course_id}";
             $this->content->items[] = "<a href='{$url}'>{$label}</a>";
             $this->content->icons[] = "<img src='{$CFG->wwwroot}/blocks/assmgr/pix/icon.gif' class='icon' alt='".get_string('assmgricon', 'block_assmgr')."' title='{$label}' />";
         }
@@ -202,8 +222,6 @@ class block_assmgr extends block_list {
 
         require_once($CFG->dirroot.'/lib/grade/constants.php');
 
-        /*
-        
         // Set the right grade type
         $sql = "courseid={$COURSE->id} AND itemtype='course'";
         $courseitem = $DB->get_record_select('grade_items', $sql);
@@ -228,15 +246,50 @@ class block_assmgr extends block_list {
         $data->portfolio_quota = 5;
 
         $this->instance_config_save($data);
-        
-        */
     }
 
     function before_delete() {
 
         global $CFG, $DB;
 
- 
+        // include assessment manager db class
+        require_once($CFG->dirroot.'/blocks/assmgr/db/assmgr_db.php');
+
+        require_once($CFG->libdir . '/gradelib.php');
+
+        uninstall_resources();
+
+        grade_uninstalled_module(GRADE_ASSMGR_ITEMMODULE);
+
+        $dbc = new assmgr_db();
+
+        //delete all grade item history records
+        $dbc->delete_item_history();
+
+         //delete all grade grade history records
+        $dbc->delete_grade_history();
+
+        //retrieve and delete all events associated with the assessment manager
+        $calendar_events = $dbc->get_assmgr_calendar_events();
+        
+        if (!empty($calendar_events)) {
+            foreach ($calendar_events as $ce) {
+                $dbc->delete_assmgr_calendar_event($ce->event_id);
+                $dbc->delete_assessment_event($ce->event_id);
+             }
+        }
+
+        //delete all block config
+        $dbc->delete_block_config();
+
+        //delete all files from the file system
+        $portfolio_candidates = $dbc->get_portfolio_candidates();
+
+        if (!empty($portfolio_candidates)) {
+            foreach ($portfolio_candidates as $candidate) {
+                //remove_directory(make_user_directory($candidate->candidate_id)."/block_assmgr");
+            }
+        }
     }
 
     /**
@@ -247,6 +300,11 @@ class block_assmgr extends block_list {
     function cron() {
         global $CFG;
 
+        // include the evidence resource class
+        require_once($CFG->dirroot.'/blocks/assmgr/classes/resources/assmgr_resource.php');
+
+        // update all evidence resources, for everyone in every course
+        assmgr_resource::update_resources();
     }
 }
 ?>
