@@ -80,10 +80,10 @@ $allowedcourses = get_user_courses_bycap(
     array('category', 'fullname', 'groupmode', 'defaultgroupingid')
 );
 
-
 if (empty($allowedcourses) && is_siteadmin($USER)) {
-	$course			=	$dbc->get_course($course_id);
-	$allowedcourses	=	array($course);
+	//$course			=	$dbc->get_course(1);
+	//$allowedcourses	=	array($course);
+	$allowedcourses	=	get_courses();
 }
 
 // if there is a specific course then check the user permissions against that course
@@ -104,24 +104,32 @@ if(!empty($course_id)) {
 
     $groupcourse = $course;
 } else {
+	
     // the user is an assessor if they have at least one course they can assess
     $access_isassessor = !empty($allowedcourses);
-    
-    reset($allowedcourses);
-    
+
     // get the first course
-    $groupcourse = current($allowedcourses);
-    
+    $groupcourse = $allowedcourses[0];
+
     // get the course context of the first course
     $coursecontext = get_context_instance(CONTEXT_COURSE, $groupcourse->id);
 
     // can the user see the user photos
-    $access_canviewuserdetails = has_capability('moodle/user:viewdetails', $coursecontext);
+	try {
+		$access_canviewuserdetails = has_capability('moodle/user:viewdetails', $coursecontext);
+	} catch (Exception $e) {
+		$access_canviewuserdetails = false;
+	}
 
 }
 
 // check to see if groups are being used in this course
 $group_id = groups_get_course_group($groupcourse, true);
+
+/*
+print "access_isassessor";
+print_object($access_isassessor);
+*/
 
 if(!$access_isassessor) {
     print_error('nopageaccess', 'block_assmgr');
